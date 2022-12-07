@@ -55,8 +55,7 @@ describe("🚩 Challenge 3: 🎲 Dice Game", function () {
         break;
       }
 
-      const options = { value: ethers.utils.parseEther("0.002") };
-      await diceGame.rollTheDice(options);
+        await diceGame.rollTheDice({ value: ethers.utils.parseEther("0.002") });
     }
     return expectedRoll;
   }
@@ -86,7 +85,9 @@ describe("🚩 Challenge 3: 🎲 Dice Game", function () {
       const expectedRoll = await getRoll(getRollLessThanTwo);
       console.log('\t',"🎲 Expect roll to be less than or equal to 2. Dice Game Roll:", expectedRoll.toNumber());
 
-      const tx = riggedRoll.riggedRoll();
+      const tx = riggedRoll.connect(deployer).riggedRoll({
+        value: ethers.utils.parseEther("0.002"),
+      });
 
       it("Should emit Roll event", async () => {
        await expect(tx).to.emit(diceGame, "Roll").withArgs(riggedRoll.address, expectedRoll);
@@ -103,7 +104,11 @@ describe("🚩 Challenge 3: 🎲 Dice Game", function () {
       console.log('\t',"🎲 Expect roll to be greater than 2. Dice Game Roll:", expectedRoll.toNumber());
       console.log('\t',"◀  Expect riggedRoll to be reverted");
 
-      await expect(riggedRoll.riggedRoll()).to.be.reverted;
+      await expect(
+        riggedRoll
+          .connect(deployer)
+          .riggedRoll({ value: ethers.utils.parseEther("0.002") })
+      ).to.be.reverted;
     });
 
     it("Should withdraw funds", async () => {
@@ -111,11 +116,8 @@ describe("🚩 Challenge 3: 🎲 Dice Game", function () {
       await fundRiggedContract();
 
       const prevBalance = await deployer.getBalance();
-      console.log('\t',"💲 Current RiggedRoll balance: ",ethers.utils.formatEther(prevBalance));
-      await riggedRoll.withdraw(
-        deployer.address,
-        provider.getBalance(riggedRoll.address)
-      );
+      console.log('\t', "💲 Current RiggedRoll balance: ", ethers.utils.formatEther(prevBalance));
+       await riggedRoll.withdraw();
 
       const curBalance = await deployer.getBalance();
       console.log('\t',"💲 New RiggedRoll balance: ",ethers.utils.formatEther(curBalance));

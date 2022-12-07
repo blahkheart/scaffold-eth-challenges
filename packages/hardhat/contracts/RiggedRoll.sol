@@ -28,7 +28,6 @@ contract RiggedRoll is Ownable {
         bytes32 hash = keccak256(abi.encodePacked(prevHash, diceGameAddress, diceGame.nonce()));
         uint256 roll = uint256(hash) % 16;
 
-        console.log("");
         console.log('\t',"   Rigged Game Roll:", roll);
         require(roll <= 2, "NOT WIN");
         diceGame.rollTheDice{ value: msg.value}();
